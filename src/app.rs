@@ -1,12 +1,11 @@
 use leptos::leptos_dom::ev::SubmitEvent;
-use leptos::logging::log;
-use leptos::tracing::{info, info_span};
 use leptos::*;
 use leptos::ev::Event;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
 use crate::cleanup::remove_comments;
+use crate::keywords::get_keywords;
 
 #[derive(Serialize, Deserialize)]
 pub struct Clean {
@@ -60,7 +59,6 @@ pub fn App() -> impl IntoView {
             let fs: Clean = from_value(fs).unwrap();
             if !fs.base.is_empty() {
                 let filtered = remove_comments(fs.base.clone());
-                println!("filtered");
                 set_file_output.set(filtered);
             }
             set_file_input.set(fs.base);

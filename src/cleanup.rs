@@ -1,3 +1,5 @@
+use leptos::tracing::info;
+
 #[derive(Clone, Copy, Debug)]
 enum State {
     String,
@@ -5,7 +7,6 @@ enum State {
     Comment,
     MultilineComment,
     Asterisk,
-    // MultilineCommentEnd,
     Whitespace,
     Newline,
     Extra,
@@ -14,7 +15,7 @@ enum State {
 pub fn remove_comments(mut program: String) -> String {
     let mut state: State = State::String;
     let mut current_idx: usize = 0;
-    let mut current: char = ' ';
+    let mut current: char;
     while current_idx < program.chars().count() {
         current = program.as_str().as_bytes()[current_idx] as char;
         match state {
@@ -49,11 +50,14 @@ pub fn remove_comments(mut program: String) -> String {
                     c if c.is_alphanumeric() => State::String,
                     _ => State::Extra,
                 };
-                current_idx += 1;
+                // current_idx += 1;
             }
             State::Comment => {
                 state = match current {
-                    '\n' => State::Newline,
+                    '\n' => {
+                        program.remove(current_idx);
+                        State::Newline
+                    },
                     _ => {
                         program.remove(current_idx);
                         State::Comment
@@ -122,10 +126,10 @@ pub fn remove_comments(mut program: String) -> String {
     add_line_numbers(program)
 
 }
-fn remove_empty_lines(mut program: String) -> String {
-    program.trim().lines().filter(|x| x.is_empty()).fold(String::new(), |s, l| s + l + "\n")
+fn remove_empty_lines(program: String) -> String {
+    program.trim().lines().filter(|x| x != &"\n").fold(String::new(), |s, l| s + l + "\n")
 }
-fn add_line_numbers(mut program: String) -> String {
+fn add_line_numbers(program: String) -> String {
     let mut output: String = String::new();
     for (idx, sub) in program.lines().enumerate() {
         output.push_str(&format!("{:<3}{}\n", idx + 1, sub))
