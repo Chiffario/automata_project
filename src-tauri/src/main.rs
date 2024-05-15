@@ -16,7 +16,7 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command(async)]
-fn read(path: &str) -> Clean {
+fn read(_path: &str) -> Clean {
     let path = tauri::api::dialog::blocking::FileDialogBuilder::new()
         .set_directory("/home/chiffa/Dev/Solutions/C++/Test/").pick_file();
     let base = fs::read_to_string(path.unwrap()).unwrap_or("Error".to_owned());

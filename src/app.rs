@@ -4,8 +4,8 @@ use leptos::ev::Event;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
-use crate::cleanup::remove_comments;
-use crate::keywords::get_keywords;
+use crate::cleanup::{add_line_numbers, remove_comments};
+use crate::{descriptors, keywords};
 
 #[derive(Serialize, Deserialize)]
 pub struct Clean {
@@ -31,6 +31,17 @@ pub fn App() -> impl IntoView {
     let (name, set_name) = create_signal(String::new());
     let (file_input, set_file_input) = create_signal(String::new());
     let (file_output, set_file_output) = create_signal(String::new());
+    let (descriptors, set_descriptors) = create_signal(String::new());
+    let (pseudo, set_pseudo) = create_signal(String::new());
+
+    let (identifiers, set_identifiers) = create_signal(String::new());
+    let (keywords, set_keywords) = create_signal(String::new());
+    let (separators, set_separators) = create_signal(String::new());
+    let (strings, set_strings) = create_signal(String::new());
+    let (consts, set_consts) = create_signal(String::new());
+    let (operators, set_operators) = create_signal(String::new());
+
+
     let update_name = move |ev| {
         let v = event_target_value(&ev);
         set_name.set(v);
@@ -38,11 +49,27 @@ pub fn App() -> impl IntoView {
 
     let update_filtered = move |ev: Event| {
         let v = event_target_value(&ev).clone();
-        info!("Obtained etv: {v}");
         if !v.is_empty() {
             let filtered = remove_comments(v);
-            // info!("Obtained filtered text: {v}");
-            set_file_output.set(filtered);
+            let descr = keywords::count_tokens(filtered.clone());
+            let table = match descr {
+                Ok(val) => descriptors::create_descriptors(val),
+                Err(e) => {
+                    set_descriptors.set(e.to_string());
+                    None
+                },
+            };
+            let table = table.unwrap();
+            set_descriptors.set(table.descriptors);
+            set_pseudo.set(table.pseudocode);
+
+            set_identifiers.set(table.identifiers);
+            set_keywords.set(table.keywords);
+            set_separators.set(table.separators);
+            set_strings.set(table.strings);
+            set_consts.set(table.consts);
+            set_operators.set(table.operators);
+            set_file_output.set(add_line_numbers(filtered));
         }
     };
 
@@ -59,7 +86,26 @@ pub fn App() -> impl IntoView {
             let fs: Clean = from_value(fs).unwrap();
             if !fs.base.is_empty() {
                 let filtered = remove_comments(fs.base.clone());
-                set_file_output.set(filtered);
+                let filt_out = add_line_numbers(filtered.clone());
+                let descr = keywords::count_tokens(filtered.clone());
+                let table = match descr {
+                    Ok(val) => descriptors::create_descriptors(val),
+                    Err(e) => {
+                        set_descriptors.set(e.to_string());
+                        None
+                    },
+                };
+                let table = table.unwrap();
+                set_file_output.set(filt_out);
+                set_descriptors.set(table.descriptors);
+                set_pseudo.set(table.pseudocode);
+
+                set_identifiers.set(table.identifiers);
+                set_keywords.set(table.keywords);
+                set_separators.set(table.separators);
+                set_strings.set(table.strings);
+                set_consts.set(table.consts);
+                set_operators.set(table.operators);
             }
             set_file_input.set(fs.base);
         });
@@ -84,6 +130,42 @@ pub fn App() -> impl IntoView {
                 <div class="display_text"
                     prop:value=move || file_output.get()>
                     <code>{file_output}</code>
+                </div>
+            </div>
+            <div class="row">
+                <div class="display_text"
+                    prop:value=move || descriptors.get()>
+                    <code>{descriptors}</code>
+                </div>
+                <div class="display_text"
+                    prop:value=move || pseudo.get()>
+                    <code>{pseudo}</code>
+                </div>
+            </div>
+            <div class="row">
+                <div class="display_text"
+                    prop:value=move || identifiers.get()>
+                    <code>{identifiers}</code>
+                </div>
+                <div class="display_text"
+                    prop:value=move || keywords.get()>
+                    <code>{keywords}</code>
+                </div>
+                <div class="display_text"
+                    prop:value=move || separators.get()>
+                    <code>{separators}</code>
+                </div>
+                <div class="display_text"
+                    prop:value=move || strings.get()>
+                    <code>{strings}</code>
+                </div>
+                <div class="display_text"
+                    prop:value=move || consts.get()>
+                    <code>{consts}</code>
+                </div>
+                <div class="display_text"
+                    prop:value=move || operators.get()>
+                    <code>{operators}</code>
                 </div>
             </div>
         </main>

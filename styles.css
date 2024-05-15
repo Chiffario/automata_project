@@ -48,7 +48,7 @@
 .display_text {
   max-height: 78dvh;
   height: fit-content;
-  width: 40%;
+  width: fit-content;
   white-space: pre-wrap;
   overflow-y: scroll;
   overflow-x: hidden;

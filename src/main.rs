@@ -1,6 +1,7 @@
 mod app;
 pub mod cleanup;
 mod keywords;
+mod descriptors;
 
 use app::*;
 use leptos::*;

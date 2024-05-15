@@ -123,16 +123,17 @@ pub fn remove_comments(mut program: String) -> String {
         }
     }
     program = remove_empty_lines(program);
-    add_line_numbers(program)
+    program
+    // add_line_numbers(program)
 
 }
 fn remove_empty_lines(program: String) -> String {
     program.trim().lines().filter(|x| x != &"\n").fold(String::new(), |s, l| s + l + "\n")
 }
-fn add_line_numbers(program: String) -> String {
+pub fn add_line_numbers(program: String) -> String {
     let mut output: String = String::new();
     for (idx, sub) in program.lines().enumerate() {
-        output.push_str(&format!("{:<3}{}\n", idx + 1, sub))
+        output.push_str(&format!("{:<3}{}\n", idx, sub))
     }
     output
 }
