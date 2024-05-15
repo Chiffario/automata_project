@@ -1,4 +1,3 @@
-use leptos::tracing::info;
 
 #[derive(Clone, Copy, Debug)]
 enum State {

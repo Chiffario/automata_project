@@ -1,6 +1,5 @@
-use std::collections::{BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeSet};
 use crate::keywords::{Token, TokenType};
-use crate::keywords::TokenType::Identifier;
 
 pub struct Table {
     pub descriptors: String,
@@ -13,13 +12,13 @@ pub struct Table {
     pub operators: String,
 }
 
-pub fn create_descriptors(mut tokens: Vec<Token>) -> Option<Table> {
+pub fn create_descriptors(tokens: Vec<Token>) -> Option<Table> {
     let clone = tokens.clone();
-    let (mut identifiers, rest): (Vec<Token>, Vec<Token>) = clone.into_iter().partition(|x| x.token_type == TokenType::Identifier);
-    let (mut keywords, rest): (Vec<Token>, Vec<Token>) = rest.into_iter().partition(|x| x.token_type == TokenType::Keyword);
-    let (mut separators, rest): (Vec<Token>, Vec<Token>) = rest.into_iter().partition(|x| x.token_type == TokenType::Separator);
-    let (mut strings, rest): (Vec<Token>, Vec<Token>) = rest.into_iter().partition(|x| x.token_type == TokenType::StringLiteral);
-    let (mut consts, mut operators): (Vec<Token>, Vec<Token>) = rest.into_iter().partition(|x| x.token_type == TokenType::ConstValue);
+    let (identifiers, rest): (Vec<Token>, Vec<Token>) = clone.into_iter().partition(|x| x.token_type == TokenType::Identifier);
+    let (keywords, rest): (Vec<Token>, Vec<Token>) = rest.into_iter().partition(|x| x.token_type == TokenType::Keyword);
+    let (separators, rest): (Vec<Token>, Vec<Token>) = rest.into_iter().partition(|x| x.token_type == TokenType::Separator);
+    let (strings, rest): (Vec<Token>, Vec<Token>) = rest.into_iter().partition(|x| x.token_type == TokenType::StringLiteral);
+    let (consts, operators): (Vec<Token>, Vec<Token>) = rest.into_iter().partition(|x| x.token_type == TokenType::ConstValue);
 
     let mut identifier_set: BTreeSet<String> = BTreeSet::new();
     for i in identifiers {

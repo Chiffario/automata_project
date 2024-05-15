@@ -490,7 +490,7 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                     c => State::Character(c),
                 }
             }
-            State::StringLiteralCharacter(c) => {
+            State::StringLiteralCharacter(_c) => {
                 state = match current {
                     c if c.is_alphabetic() => {
                         temporary_text.push(c);
@@ -510,7 +510,7 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                     }
                 }
             }
-            State::ValueCharacter(c) => {
+            State::ValueCharacter(_c) => {
                 state = match current {
                     c if c.is_numeric() || c == '.' => {
                         temporary_text.push(c);
@@ -536,7 +536,7 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                     c => State::Character(c),
                 }
             }
-            State::IdentifierCharacter(c) => {
+            State::IdentifierCharacter(_c) => {
                 state = match current {
                     c if [' ', '\t', ';', '(', ')', ',', '{', '}', '\n'].contains(&c) => {
                         tokens.push(Token {
@@ -559,7 +559,7 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                         temporary_text.push(c);
                         State::IdentifierCharacter(c)
                     }
-                    c => return Err(Error::IncorrectIdentifier(location)),
+                    _c => return Err(Error::IncorrectIdentifier(location)),
                 }
             }
             State::IncludeI => {
@@ -5066,7 +5066,7 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                 };
             }
 
-            State::Letter(l) => {
+            State::Letter(_l) => {
                 state = match current {
                     c if c == ' ' || c == '\t' || c == ';' => {
                         tokens.push(Token {
