@@ -33,6 +33,7 @@ pub fn App() -> impl IntoView {
     let (file_output, set_file_output) = create_signal(String::new());
     let (descriptors, set_descriptors) = create_signal(String::new());
     let (pseudo, set_pseudo) = create_signal(String::new());
+    let (error, set_error) = create_signal(String::new());
 
     let (identifiers, set_identifiers) = create_signal(String::new());
     let (keywords, set_keywords) = create_signal(String::new());
@@ -55,7 +56,7 @@ pub fn App() -> impl IntoView {
             let table = match descr {
                 Ok(val) => descriptors::create_descriptors(val),
                 Err(e) => {
-                    set_descriptors.set(e.to_string());
+                    // set_error.set(e.to_string());
                     None
                 },
             };
@@ -91,7 +92,7 @@ pub fn App() -> impl IntoView {
                 let table = match descr {
                     Ok(val) => descriptors::create_descriptors(val),
                     Err(e) => {
-                        set_descriptors.set(e.to_string());
+                        // set_error.set(e.to_string());
                         None
                     },
                 };
@@ -113,7 +114,7 @@ pub fn App() -> impl IntoView {
 
     view! {
         <main class="container">
-            <form class="row" on:submit=greet>
+            <form class="row top" on:submit=greet>
                 <input
                     id="greet-input"
                     placeholder="Enter a file directory..."
@@ -121,7 +122,7 @@ pub fn App() -> impl IntoView {
                 />
                 <button type="submit">"Open"</button>
             </form>
-            <div class="row">
+            <div class="row main">
                 <textarea
                     class="display_text"
                     prop:value=move|| file_input.get()
@@ -132,40 +133,44 @@ pub fn App() -> impl IntoView {
                     <code>{file_output}</code>
                 </div>
             </div>
-            <div class="row">
+            <div class="row bot">
                 <div class="display_text"
                     prop:value=move || descriptors.get()>
-                    <code>{descriptors}</code>
+                    <code style="max-width: 30%">{descriptors}</code>
                 </div>
                 <div class="display_text"
                     prop:value=move || pseudo.get()>
-                    <code>{pseudo}</code>
+                    <code style="max-width: 30%">{pseudo}</code>
+                </div>
+                <div class="display_text"
+                    prop:value=move || error.get()>
+                    <code style="max-width: 30%">{error}</code>
                 </div>
             </div>
-            <div class="row">
-                <div class="display_text"
-                    prop:value=move || identifiers.get()>
-                    <code>{identifiers}</code>
-                </div>
+            <div class="row bot">
                 <div class="display_text"
                     prop:value=move || keywords.get()>
-                    <code>{keywords}</code>
+                    <code>10 - ключ. слова {keywords}</code>
                 </div>
                 <div class="display_text"
-                    prop:value=move || separators.get()>
-                    <code>{separators}</code>
-                </div>
-                <div class="display_text"
-                    prop:value=move || strings.get()>
-                    <code>{strings}</code>
+                    prop:value=move || identifiers.get()>
+                    <code>20 - идентификаторы {identifiers}</code>
                 </div>
                 <div class="display_text"
                     prop:value=move || consts.get()>
-                    <code>{consts}</code>
+                    <code>30 - числа {consts}</code>
                 </div>
                 <div class="display_text"
                     prop:value=move || operators.get()>
-                    <code>{operators}</code>
+                    <code>40 - операторы{operators}</code>
+                </div>
+                <div class="display_text"
+                    prop:value=move || strings.get()>
+                    <code>50 - строки{strings}</code>
+                </div>
+                <div class="display_text"
+                    prop:value=move || separators.get()>
+                    <code>60 - разделители{separators}</code>
                 </div>
             </div>
         </main>

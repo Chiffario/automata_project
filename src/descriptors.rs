@@ -48,12 +48,12 @@ pub fn create_descriptors(tokens: Vec<Token>) -> Option<Table> {
     let descriptors: String = tokens.iter().map(|x| {
         let x = x.clone();
         match x.token_type {
-            TokenType::Keyword => format!("({},{})", x.token_type as u8, keywords_set.iter().position(|y| y == &x.token).unwrap().to_string()),
-            TokenType::Identifier => format!("({},{})", x.token_type as u8, identifier_set.iter().position(|y| y == &x.token).unwrap().to_string()),
-            TokenType::Operator => format!("({},{})", x.token_type as u8, operators_set.iter().position(|y| y == &x.token).unwrap().to_string()),
-            TokenType::ConstValue => format!("({},{})", x.token_type as u8, consts_set.iter().position(|y| y == &x.token).unwrap().to_string()),
-            TokenType::StringLiteral => format!("({},{})", x.token_type as u8, strings_set.iter().position(|y| y == &x.token).unwrap().to_string()),
-            TokenType::Separator => format!("({},{})", x.token_type as u8, separators_set.iter().position(|y| y == &x.token).unwrap().to_string()),
+            TokenType::Keyword => format!("({},{})", x.token_type as u8, keywords_set.clone().iter().position(|y| y == &x.token).unwrap().to_string()),
+            TokenType::Identifier => format!("({},{})", x.token_type as u8, identifier_set.clone().iter().position(|y| y == &x.token).unwrap().to_string()),
+            TokenType::Operator => format!("({},{})", x.token_type as u8, operators_set.clone().iter().position(|y| y == &x.token).unwrap().to_string()),
+            TokenType::ConstValue => format!("({},{})", x.token_type as u8, consts_set.clone().iter().position(|y| y == &x.token).unwrap().to_string()),
+            TokenType::StringLiteral => format!("({},{})", x.token_type as u8, strings_set.clone().iter().position(|y| y == &x.token).unwrap().to_string()),
+            TokenType::Separator => format!("({},{})", x.token_type as u8, separators_set.clone().iter().position(|y| y == &x.token).unwrap().to_string()),
         }
     }).collect();
     let pseudocode: String = tokens.iter().map(|x| {
@@ -61,30 +61,30 @@ pub fn create_descriptors(tokens: Vec<Token>) -> Option<Table> {
         match x.token_type {
             TokenType::Keyword => format!("{} ", x.token),
             TokenType::Identifier => format!("id{} ", identifier_set.iter().position(|y| y == &x.token).unwrap().to_string()),
-            TokenType::Operator => format!("{} ", x.token),
-            TokenType::ConstValue => format!("const{} ", x.token),
+            TokenType::Operator => format!("{}", x.token),
+            TokenType::ConstValue => format!("const{} ", consts_set.iter().position(|y| y == &x.token).unwrap().to_string()),
             TokenType::StringLiteral => format!("str{} ", strings_set.iter().position(|y| y == &x.token).unwrap().to_string()),
-            TokenType::Separator => format!("{} ", x.token),
+            TokenType::Separator => format!("{}", x.token),
         }
     }).collect();
 
     let identifiers = identifier_set.iter().enumerate()
-        .map(|(idx, x) | format!("{:<3}{}\n", idx, x))
+        .map(|(idx, x) | format!("\n{} {}", idx, x))
         .collect();
     let keywords = keywords_set.iter().enumerate()
-        .map(|(idx, x) | format!("{:<3}{}\n", idx, x))
+        .map(|(idx, x) | format!("\n{} {}", idx, x))
         .collect();
     let separators = separators_set.iter().enumerate()
-        .map(|(idx, x) | format!("{:<3}{}\n", idx, x))
+        .map(|(idx, x) | format!("\n{} {}", idx, x))
         .collect();
     let strings = strings_set.iter().enumerate()
-        .map(|(idx, x) | format!("{:<3}{}\n", idx, x))
+        .map(|(idx, x) | format!("\n{} {}", idx, x))
         .collect();
     let consts = consts_set.iter().enumerate()
-        .map(|(idx, x) | format!("{:<3}{}\n", idx, x))
+        .map(|(idx, x) | format!("\n{} {}", idx, x))
         .collect();
     let operators = operators_set.iter().enumerate()
-        .map(|(idx, x) | format!("{:<3}{}\n", idx, x))
+        .map(|(idx, x) | format!("\n{} {}", idx, x))
         .collect();
 
 
