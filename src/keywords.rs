@@ -228,7 +228,7 @@ enum State {
     /// inline
     InlineL,
     InlineI,
-    InlineN2,
+    InlineN,
     /// int
     /// long
     LongO,
@@ -364,6 +364,7 @@ enum State {
     NumberAfterExponent(char),
     NumberAfterDot(char),
     NumberAfterExponentWithSign(char),
+    OperatorEnd,
 }
 fn is_separator(c: char) -> bool {
     match c {
@@ -399,7 +400,6 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
         char: ' ',
     };
     let mut state: State = State::Whitespace;
-    let mut token_type: TokenType = TokenType::Identifier;
     let mut buff: String = String::new();
     let mut is_writable: bool = false;
     let mut current_idx: usize = 0;
@@ -479,12 +479,10 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                     }
                     c if c.is_alphabetic() => {
                         buff.push(current);
-                        token_type = TokenType::Identifier;
                         State::Letter(c)
                     }
                     c if c.is_numeric() => {
                         buff.push(current);
-                        token_type = TokenType::ConstValue;
                         State::Number(c)
                     }
                     c if is_separator(c) => {
@@ -531,6 +529,10 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                     buff.push(current);
                     is_writable = true;
                     state = State::Incr
+                }
+                c if c.is_numeric() => {
+                    buff.push(current);
+                    state = State::Number(c)
                 }
                 c if is_whitespace(c) || is_separator(c) => {
                     current_idx -= 1;
@@ -658,6 +660,11 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                     is_writable = true;
                     state = State::BitAnd;
                 }
+                '=' => {
+                    buff.push(current);
+                    is_writable = true;
+                    state = State::BitAndAssign;
+                }
                 c if is_whitespace(c) || is_separator(c) => {
                     current_idx -= 1;
                     is_writable = true;
@@ -673,6 +680,11 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                     buff.push(current);
                     is_writable = true;
                     state = State::BitOr;
+                }
+                '=' => {
+                    buff.push(current);
+                    is_writable = true;
+                    state = State::BitOrAssign
                 }
                 c if is_whitespace(c) || is_separator(c) => {
                     current_idx -= 1;
@@ -2032,7 +2044,7 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
             State::InlineI => match current {
                 'n' => {
                     buff.push(current);
-                    state = State::InlineN2
+                    state = State::InlineN
                 }
                 c if c.is_alphanumeric() || c == '_' => {
                     buff.push(current);
@@ -2044,7 +2056,7 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                 }
                 _ => return Err(Error::IncorrectKeyword(location)),
             },
-            State::InlineN2 => match current {
+            State::InlineN => match current {
                 'e' => {
                     buff.push(current);
                     state = State::KeywordEnd
@@ -2060,7 +2072,7 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                 _ => return Err(Error::IncorrectKeyword(location)),
             },
             State::Letter('l') => match current {
-                'f' => {
+                'o' => {
                     buff.push(current);
                     state = State::LongO
                 }
@@ -2401,6 +2413,21 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                 'r' => {
                     buff.push(current);
                     state = State::KeywordEnd
+                }
+                c if c.is_alphanumeric() || c == '_' => {
+                    buff.push(current);
+                    state = State::Identifier(c)
+                }
+                c if is_whitespace(c) || is_separator(c) => {
+                    current_idx -= 1;
+                    is_writable = true;
+                }
+                _ => return Err(Error::IncorrectKeyword(location)),
+            },
+            State::Letter('o') => match current {
+                'p' => {
+                    buff.push(current);
+                    state = State::OperatorP
                 }
                 c if c.is_alphanumeric() || c == '_' => {
                     buff.push(current);
@@ -3010,6 +3037,10 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                 'a' => {
                     buff.push(current);
                     state = State::StaticA
+                }
+                'r' => {
+                    buff.push(current);
+                    state = State::StructR
                 }
                 c if c.is_alphanumeric() || c == '_' => {
                     buff.push(current);
@@ -3881,9 +3912,13 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                 }
             },
             State::Number('e') | State::Number('E') => match current {
-                c if c.is_numeric() || c == '-' || c == '+' || c == '_' => {
+                c if c.is_numeric() || c == '_' => {
                     buff.push(c);
                     state = State::NumberAfterExponent(c);
+                }
+                '-' | '+' => {
+                    buff.push(current);
+                    state = State::NumberAfterExponentWithSign(current);
                 }
                 ' ' | '\n' | '\t' | '(' | ')' | '[' | ']' | '{' | '}' | ';' => {
                     buff.push(current);
@@ -3905,7 +3940,7 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                 _ => return Err(Error::IncorrectConstant(location)),
             },
             State::NumberAfterExponent(c) => match current {
-                c if c.is_numeric() || c == '-' || c == '+' => {
+                c if c.is_numeric() => {
                     buff.push(c);
                     state = State::NumberAfterExponent(c);
                 }
@@ -3960,18 +3995,18 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                 _ => return Err(Error::IncorrectConstant(location)),
             },
 
-            State::Number('-') | State::Number('+') => match current {
-                c if c.is_numeric() => {
-                    buff.push(c);
-                    state = State::Number(c);
-                }
-                ' ' | '\n' | '\t' | '(' | ')' | '[' | ']' | '{' | '}' | ';' => {
-                    buff.push(current);
-                    current_idx -= 1;
-                    is_writable = true;
-                }
-                _ => return Err(Error::IncorrectConstant(location)),
-            },
+            // State::Number('-') | State::Number('+') => match current {
+            //     c if c.is_numeric() => {
+            //         buff.push(c);
+            //         state = State::Number(c);
+            //     }
+            //     ' ' | '\n' | '\t' | '(' | ')' | '[' | ']' | '{' | '}' | ';' => {
+            //         buff.push(current);
+            //         current_idx -= 1;
+            //         is_writable = true;
+            //     }
+            //     _ => return Err(Error::IncorrectConstant(location)),
+            // },
             State::Number(n) => match current {
                 c if c.is_numeric() || c == '.' || c == '_' || c == 'e' || c == 'E' => {
                     buff.push(c);
@@ -4016,6 +4051,7 @@ pub fn count_tokens(text: String) -> Result<Vec<Token>, Error> {
                 | State::NumberAfterExponentWithSign(_) => TokenType::ConstValue,
                 State::Separator(_) => TokenType::Separator,
                 State::StringLiteral(_) => TokenType::StringLiteral,
+                State::OperatorEnd => TokenType::Operator,
                 _ => TokenType::Operator,
             };
             state = State::Whitespace;
