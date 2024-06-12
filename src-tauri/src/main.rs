@@ -1,8 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::fs;
 use serde::{Deserialize, Serialize};
+use std::fs;
 
 #[derive(Serialize, Deserialize)]
 pub struct Clean {
@@ -18,12 +18,11 @@ fn greet(name: &str) -> String {
 #[tauri::command(async)]
 fn read(_path: &str) -> Clean {
     let path = tauri::api::dialog::blocking::FileDialogBuilder::new()
-        .set_directory("/home/chiffa/Dev/Solutions/C++/Test/").pick_file();
+        .set_directory("/home/chiffa/Dev/Projects/")
+        .pick_file();
     let base = fs::read_to_string(path.unwrap()).unwrap_or("Error".to_owned());
     Clean { base }
 }
-
-
 
 fn main() {
     tauri::Builder::default()
