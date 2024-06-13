@@ -8,7 +8,6 @@ enum State {
     Asterisk,
     Whitespace,
     Newline,
-    Extra,
 }
 
 pub fn remove_comments(mut program: String) -> String {
@@ -23,9 +22,8 @@ pub fn remove_comments(mut program: String) -> String {
                 state = match current {
                     ' ' | '\t' => State::Whitespace,
                     '\n' => State::Newline,
-                    n if n.is_alphanumeric() || n == ';' => State::String,
                     '/' => State::Slash,
-                    _ => State::Extra,
+                    _ => State::String,
                 };
                 current_idx += 1;
             }
@@ -46,8 +44,7 @@ pub fn remove_comments(mut program: String) -> String {
                     },
                     ' ' | '\t' => State::Whitespace,
                     '\n' => State::Newline,
-                    c if c.is_alphanumeric() => State::String,
-                    _ => State::Extra,
+                    _ => State::String,
                 };
                 // current_idx += 1;
             }
